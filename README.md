@@ -9,7 +9,7 @@ address; finished runs post to a global leaderboard (username + score).
 Squeek Jump is a community project for the Squeekchain Buildooooor badge.
 
 <!-- GENESIS REPOSITORY LINE: when you start verification on squeekchain.com/genesis, paste the repository line they give you right below this comment. -->
-<!-- genesis-repo-line: REPLACE-ME -->
+squeekchain-project: 4c72af67-e43d-41ed-8883-b0078ea814e0
 
 ## The Squeekchain twist — Wheel Boost
 
