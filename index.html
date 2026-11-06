@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Squeek Jump — Hamster Runner</title>
+<meta name="description" content="Squeek Jump: a Chrome-dino-style endless runner rethemed for Squeekchain. Help Squeektoshi the hamster jump the seed piles, bottles, boxes and sleeping cats — boosted by his real exercise wheel.">
+<!-- GENESIS_PAGE_TAG: paste the tag from Genesis Direct verification here -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐹</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">🐹 Squeek Jump</div>
+  <div class="top-actions">
+    <span id="wheelChip" class="chip" title="Live wheel status from api.squeekchain.com">Wheel: checking…</span>
+    <button id="muteBtn" class="icon-btn" type="button" aria-label="Toggle sound">🔊</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ ENTRY VIEW ============ -->
+  <section id="view-entry" class="view">
+    <div class="card">
+      <h1>Squeek Jump 🐹</h1>
+      <p class="tagline">Squeektoshi is on the run! Jump the seed piles, water bottles,
+        cardboard boxes, rolling balls and sleeping cats. One hit ends the run —
+        points are earned for every obstacle you clear.</p>
+
+      <label class="field" for="usernameInput">Username
+        <input id="usernameInput" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="e.g. squeekfan_01">
+      </label>
+      <p class="error" id="usernameError"></p>
+
+      <label class="field" for="addressInput">Wallet address
+        <input id="addressInput" type="text" maxlength="42" autocomplete="off" spellcheck="false" placeholder="0x…">
+      </label>
+      <p class="error" id="addressError"></p>
+
+      <button id="startBtn" class="primary" type="button">▶ Start running</button>
+      <p class="hint">Controls: <b>Space</b> / <b>↑</b> / <b>W</b> / click / tap to jump — <b>hold</b> to jump higher.
+        Your address is only typed in as a leaderboard name tag: no wallet connection, no signing, ever.</p>
+    </div>
+
+    <div class="card">
+      <h2>🏠 Competition rooms</h2>
+      <p class="tagline">Create a room for a whitelist or airdrop competition — it gets its own
+        leaderboard. Share the code, players join, and their runs count only in that room.</p>
+
+      <label class="field" for="roomNameInput">New room name
+        <input id="roomNameInput" type="text" maxlength="30" autocomplete="off" spellcheck="false" placeholder="e.g. WL Sprint #1">
+      </label>
+      <p class="error" id="createRoomError"></p>
+      <button id="createRoomBtn" class="secondary" type="button">Create room</button>
+
+      <div id="createdRoomBox" class="created-room hidden">
+        <p>Your room is ready — share this code:</p>
+        <div class="big-code" id="createdRoomCode">------</div>
+        <div class="row-btns">
+          <button id="copyCodeBtn" class="secondary small" type="button">Copy code</button>
+          <button id="copyLinkBtn" class="secondary small" type="button">Copy invite link</button>
+          <button id="createdEnterBtn" class="primary small" type="button">Enter room →</button>
+        </div>
+        <p class="hint" id="copyNote"></p>
+      </div>
+
+      <hr class="sep">
+
+      <label class="field" for="joinCodeInput">Join with a room code
+        <input id="joinCodeInput" type="text" maxlength="6" autocomplete="off" spellcheck="false" placeholder="ABC123" style="text-transform:uppercase">
+      </label>
+      <p class="error" id="joinRoomError"></p>
+      <button id="joinRoomBtn" class="secondary" type="button">Join room</button>
+    </div>
+
+    <div class="card">
+      <h2>🏆 Global leaderboard</h2>
+      <p class="tagline">Top 100 — one entry per player, only your best score counts.</p>
+      <div class="board">
+        <div class="board-viewport" id="gBoardViewport">
+          <div class="board-track" id="gBoardTrack"></div>
+        </div>
+        <div class="board-nav">
+          <button id="gBoardPrev" class="nav-btn" type="button" aria-label="Previous slide">‹</button>
+          <div class="dots" id="gBoardDots"></div>
+          <button id="gBoardNext" class="nav-btn" type="button" aria-label="Next slide">›</button>
+        </div>
+      </div>
+      <button id="gBoardDownload" class="secondary" type="button">⬇ Download CSV (top 100)</button>
+    </div>
+  </section>
+
+  <!-- ============ ROOM VIEW ============ -->
+  <section id="view-room" class="view hidden">
+    <div class="card room-head">
+      <h2 id="roomName">Room</h2>
+      <div class="big-code" id="roomCodeBig">------</div>
+      <p class="tagline"><span id="roomPlayers">0</span> player(s) on this room's board</p>
+      <div class="banner">🎯 Scores in this room go to <b>this room's leaderboard only</b> — not the global board.</div>
+      <p class="tagline" id="roomPlayerLine"></p>
+      <div class="row-btns">
+        <button id="playRoomBtn" class="primary" type="button">▶ Play in this room</button>
+        <button id="leaveRoomBtn" class="secondary" type="button">Leave room</button>
+      </div>
+      <p class="error" id="roomPlayError"></p>
+    </div>
+
+    <div class="card">
+      <h2>🏆 Room leaderboard</h2>
+      <p class="tagline">Top 100 in this room — one entry per player, best score only.</p>
+      <div class="board">
+        <div class="board-viewport" id="rBoardViewport">
+          <div class="board-track" id="rBoardTrack"></div>
+        </div>
+        <div class="board-nav">
+          <button id="rBoardPrev" class="nav-btn" type="button" aria-label="Previous slide">‹</button>
+          <div class="dots" id="rBoardDots"></div>
+          <button id="rBoardNext" class="nav-btn" type="button" aria-label="Next slide">›</button>
+        </div>
+      </div>
+      <button id="rBoardDownload" class="secondary" type="button">⬇ Download CSV (top 100)</button>
+    </div>
+  </section>
+
+  <!-- ============ GAME VIEW ============ -->
+  <section id="view-game" class="view hidden">
+    <div class="game-wrap" id="gameWrap">
+      <canvas id="gameCanvas"></canvas>
+      <div class="hud">
+        <span class="hud-item">Score <b id="hudScore">0</b> pts</span>
+        <span class="hud-item">Best <b id="hudBest">0</b></span>
+        <span class="hud-item" id="hudTempo">Tempo ×1.0</span>
+        <span class="hud-item" id="hudBoost">Boost ×1.00</span>
+      </div>
+      <button id="quitBtn" class="icon-btn quit" type="button" aria-label="Quit run">✕</button>
+      <div id="tapHint" class="tap-hint">Tap / Space to jump — hold for higher</div>
+
+      <div id="gameOver" class="overlay hidden">
+        <div class="overlay-card">
+          <h2 id="goTitle">Run over!</h2>
+          <p class="go-score"><span id="goScore">0</span> pts</p>
+          <p id="goCleared">Obstacles cleared: 0</p>
+          <p id="goBest">Best: 0</p>
+          <p id="goNote" class="go-note"></p>
+          <p id="goRank" class="go-rank"></p>
+          <div class="row-btns center">
+            <button id="againBtn" class="primary" type="button">↻ Run again</button>
+            <button id="backBtn" class="secondary" type="button">Back</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="hint center">Space / ↑ / W / click / tap = jump · hold = higher jump · the longer you run, the faster it gets!</p>
+  </section>
+
+</main>
+
+<footer>
+  <p>Squeek Jump — a community project for the Squeekchain Buildooooor badge.
+    Read-only game: no wallet connection, no signing, no transactions. Wheel data: api.squeekchain.com.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
