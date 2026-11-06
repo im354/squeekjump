@@ -1008,7 +1008,7 @@ function drawCat(x, baseY, rot) {
   ctx.save();
   ctx.translate(x + 32, baseY);
   ctx.rotate(rot || 0);
-  ctx.translate(-32, 0);
+  ctx.translate(-(x + 32), -baseY);
   // tail
   ctx.strokeStyle = '#8f887e';
   ctx.lineWidth = 5;
